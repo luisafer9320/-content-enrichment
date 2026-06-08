@@ -1,0 +1,38 @@
+2026-06-08 15:22:15,192 - INFO - El usuario ha iniciado el sistema.
+2026-06-08 15:24:23,721 - INFO - Iniciando scraping en Wikipedia para el tema: 'como estimulo el apetito de mi bebe de 1 año'
+2026-06-08 15:24:24,562 - ERROR - Artículo no encontrado (404) para el tema: como estimulo el apetito de mi bebe de 1 año
+2026-06-08 15:24:24,563 - INFO - Simulando enriquecimiento de texto con OpenAI para la entrega técnica.
+2026-06-08 15:24:24,563 - INFO - Simulando enriquecimiento de texto con OpenAI para la entrega técnica.
+2026-06-08 15:24:48,617 - INFO - Simulando resumen ejecutivo de ChatGPT.
+2026-06-08 15:24:48,618 - INFO - Iniciando proceso de traducción al idioma: es
+2026-06-08 15:24:49,393 - INFO - Traducción completada con éxito.
+2026-06-08 15:25:26,266 - ERROR - Error al guardar el archivo en disco: 'NoneType' object has no attribute 'replace'
+2026-06-08 15:25:26,266 - INFO - Ejecución del flujo completada con éxito.
+2026-06-08 15:28:07,140 - INFO - El usuario ha iniciado el sistema.
+2026-06-08 15:28:52,425 - INFO - Iniciando scraping en Wikipedia para el tema: 'Python (lenguaje de programación)'
+2026-06-08 15:28:53,097 - INFO - Scraping exitoso. 5 párrafos obtenidos.
+2026-06-08 15:28:53,099 - INFO - Simulando enriquecimiento de texto con OpenAI para la entrega técnica.
+2026-06-08 15:28:57,744 - INFO - Simulando resumen ejecutivo de ChatGPT.
+2026-06-08 15:28:57,744 - INFO - Iniciando proceso de traducción al idioma: es
+2026-06-08 15:28:58,242 - INFO - Traducción completada con éxito.
+2026-06-08 15:29:09,567 - INFO - Archivo exportado correctamente con nombre: Python (lenguaje de programación).pdf
+2026-06-08 15:29:09,567 - INFO - Ejecución del flujo completada con éxito.
+2026-06-08 15:37:40,817 - INFO - El usuario ha iniciado el sistema.
+2026-06-08 15:38:01,431 - INFO - Iniciando scraping en Wikipedia para el tema: 'Nutrición infantil'
+2026-06-08 15:38:02,153 - ERROR - Artículo no encontrado (404) para el tema: Nutrición infantil
+2026-06-08 15:38:02,155 - INFO - Simulando enriquecimiento de texto con OpenAI para la entrega técnica.
+2026-06-08 15:38:02,155 - INFO - Simulando enriquecimiento de texto con OpenAI para la entrega técnica.
+2026-06-08 15:38:09,615 - INFO - Simulando resumen ejecutivo de ChatGPT.
+2026-06-08 15:38:09,615 - INFO - Iniciando proceso de traducción al idioma: es
+2026-06-08 15:38:10,138 - INFO - Traducción completada con éxito.
+2026-06-08 15:38:21,561 - INFO - Archivo exportado correctamente con nombre: Nutrición infantil.pdf
+2026-06-08 15:38:21,561 - INFO - Ejecución del flujo completada con éxito.
+2026-06-08 15:39:17,151 - INFO - El usuario ha iniciado el sistema.
+2026-06-08 15:39:24,518 - INFO - Iniciando scraping en Wikipedia para el tema: 'Javascript'
+2026-06-08 15:39:25,455 - INFO - Scraping exitoso. 5 párrafos obtenidos.
+2026-06-08 15:39:25,456 - INFO - Simulando enriquecimiento de texto con OpenAI para la entrega técnica.
+2026-06-08 15:39:27,671 - INFO - Simulando resumen ejecutivo de ChatGPT.
+2026-06-08 15:39:27,671 - INFO - Iniciando proceso de traducción al idioma: es
+2026-06-08 15:39:28,182 - INFO - Traducción completada con éxito.
+2026-06-08 15:39:49,803 - INFO - Archivo exportado correctamente con nombre: Javascript.pdf
+2026-06-08 15:39:49,803 - INFO - Ejecución del flujo completada con éxito.
