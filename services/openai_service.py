@@ -1,32 +1,88 @@
 import logging
+import os
+from typing import Optional
 
-def enriquecer_con_ai(texto_original):
-    """
-    Simulación profesional de enriquecimiento de texto para entornos de evaluación
-    cuando los límites de API o conflictos de entorno local están restringidos.
-    """
-    logging.info("Simulando enriquecimiento de texto con OpenAI para la entrega técnica.")
-    texto_enriquecido = (
-        f"{texto_original}\n\n"
-        f"========================================================\n"
-        f"   [ANÁLISIS DE ENRIQUECIMIENTO INTEGRADO POR IA - GPT-4]\n"
-        f"========================================================\n"
-        f"• DATOS CONTEXTUALES: El tema seleccionado presenta un impacto analítico "
-        f"clave en la estructura de datos moderna back-end.\n"
-        f"• CRÍTICA HISTÓRICA: Se identifican conexiones multidisciplinarias en las "
-        f"fuentes primarias del artículo.\n"
-        f"• CONCLUSIÓN DE IA: La documentación del backend valida el flujo semántico con éxito."
-    )
-    return texto_enriquecido
+from openai import OpenAI
 
-def generar_resumen(texto_enriquecido):
-    """
-    Simulación del requisito extra de resumen ejecutivo.
-    """
-    logging.info("Simulando resumen ejecutivo de ChatGPT.")
-    resumen = (
-        "• *Punto Clave 1:* Extracción y limpieza automatizada de los primeros 5 párrafos mediante BeautifulSoup.\n"
-        "• *Punto Clave 2:* Procesamiento y transformación de datos en la capa de servicios back-end.\n"
-        "• *Punto Clave 3:* Internacionalización idiomática fluida mediante traducción automatizada."
-    )
-    return resumen
+
+class OpenAIService:
+    """Se encarga solo de comunicarse con OpenAI o usar un respaldo local."""
+
+    def __init__(self, api_key: Optional[str] = None, client=None, model: str = "gpt-4o-mini"):
+        # Si existe OPENAI_API_KEY en el entorno, usamos la API real.
+        self.api_key = api_key or os.getenv("OPENAI_API_KEY")
+        self.client = client or (OpenAI(api_key=self.api_key) if self.api_key else None)
+        self.model = model
+
+    def enrich_text(self, original_text: str) -> str:
+        """Enriquece el contenido con OpenAI; si no hay API key, usa un respaldo funcional."""
+        if not original_text:
+            return ""
+
+        if self.client is None:
+            logging.warning("OPENAI_API_KEY no esta configurada. Se usa enriquecimiento local.")
+            return self._fallback_enrichment(original_text)
+
+        prompt = (
+            "Enriquece el siguiente texto de Wikipedia para un informe educativo. "
+            "Agrega contexto, ejemplos claros y una conclusion breve. "
+            "No inventes datos especificos que no puedas justificar.\n\n"
+            f"{original_text}"
+        )
+        logging.info("Enviando contenido a OpenAI para enriquecimiento.")
+        return self._ask_openai(prompt)
+
+    def summarize_text(self, enriched_text: str) -> str:
+        """Genera un resumen del contenido enriquecido."""
+        if not enriched_text:
+            return ""
+
+        if self.client is None:
+            logging.warning("OPENAI_API_KEY no esta configurada. Se usa resumen local.")
+            return self._fallback_summary(enriched_text)
+
+        prompt = (
+            "Resume el siguiente contenido enriquecido en 5 vinetas claras para una estudiante principiante:\n\n"
+            f"{enriched_text}"
+        )
+        logging.info("Enviando contenido a OpenAI para resumen.")
+        return self._ask_openai(prompt)
+
+    def _ask_openai(self, prompt: str) -> str:
+        # Esta llamada usa el SDK oficial de OpenAI instalado en requirements.txt.
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": "Eres un asistente educativo claro y preciso."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.4,
+        )
+        return response.choices[0].message.content.strip()
+
+    def _fallback_enrichment(self, original_text: str) -> str:
+        # El respaldo permite que el proyecto funcione aunque la profesora no tenga una API key.
+        return (
+            f"{original_text}\n\n"
+            "CONTENIDO ENRIQUECIDO LOCALMENTE:\n"
+            "- Contexto: el tema se puede analizar desde su origen, evolucion e impacto actual.\n"
+            "- Relevancia: conocer sus conceptos principales ayuda a entender mejor el articulo base.\n"
+            "- Ejemplo de uso: este contenido puede servir como punto de partida para una investigacion.\n"
+            "- Conclusion: la informacion extraida de Wikipedia fue ampliada para facilitar el aprendizaje."
+        )
+
+    def _fallback_summary(self, enriched_text: str) -> str:
+        # Tomamos las primeras ideas del texto para producir un resumen simple sin depender de internet.
+        sentences = [part.strip() for part in enriched_text.replace("\n", " ").split(".") if part.strip()]
+        selected = sentences[:5] or ["No hay contenido suficiente para resumir"]
+        return "\n".join(f"- {sentence}." for sentence in selected)
+
+
+def enriquecer_con_ai(texto_original: str) -> str:
+    """Funcion de compatibilidad para enriquecer texto desde main.py."""
+    return OpenAIService().enrich_text(texto_original)
+
+
+def generar_resumen(texto_enriquecido: str) -> str:
+    """Funcion de compatibilidad para generar resumen desde main.py."""
+    return OpenAIService().summarize_text(texto_enriquecido)

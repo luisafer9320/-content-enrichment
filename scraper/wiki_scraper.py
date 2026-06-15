@@ -1,52 +1,85 @@
 import logging
+from dataclasses import dataclass
+from typing import Optional, Tuple
+from urllib.parse import quote
+
 import requests
 from bs4 import BeautifulSoup
 
 
-def scraping_wikipedia(tema):
-    """
-    Realiza una búsqueda en Wikipedia en español, extrae el título
-    y exactamente los primeros 5 párrafos de contenido.
-    """
-    # Reemplazamos los espacios por guiones bajos para formar la URL de Wikipedia
-    url = f"https://es.wikipedia.org/wiki/{tema.replace(' ', '_')}"
+@dataclass
+class WikipediaArticle:
+    """Representa los datos minimos que necesitamos de un articulo."""
 
-    try:
-        logging.info(f"Iniciando scraping en Wikipedia para el tema: '{tema}'")
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    title: str
+    content: str
 
-        # Realizamos la petición a la web
-        respuesta = requests.get(url, headers=headers, timeout=10)
 
-        if respuesta.status_code == 404:
-            logging.error(f"Artículo no encontrado (404) para el tema: {tema}")
-            print("[Error] No se encontró el artículo exacto en Wikipedia.")
-            return None, None
+class WikipediaScraper:
+    """Se encarga solo de buscar y extraer contenido desde Wikipedia."""
 
-        respuesta.raise_for_status()
-        soup = BeautifulSoup(respuesta.text, 'html.parser')
+    def __init__(self, base_url: str = "https://es.wikipedia.org/wiki", http_client=requests):
+        # Guardamos la URL base y el cliente HTTP para poder probar esta clase sin internet.
+        self.base_url = base_url.rstrip("/")
+        self.http_client = http_client
 
-        # Extraemos el título principal de la página
-        titulo = soup.find('h1', id='firstHeading').text
+    def search(self, topic: str) -> Optional[WikipediaArticle]:
+        """Busca un tema y devuelve el titulo y los primeros cinco parrafos utiles."""
+        clean_topic = topic.strip()
+        if not clean_topic:
+            logging.warning("WikipediaScraper recibio un tema vacio.")
+            return None
 
-        # Buscamos todos los párrafos (<p>)
-        parrafos = soup.find_all('p')
-        parrafos_limpios = []
+        url = self._build_url(clean_topic)
+        logging.info("Consultando Wikipedia para el tema: %s", clean_topic)
 
-        for p in parrafos:
-            texto = p.text.strip()
-            # Filtramos textos muy cortos o vacíos para asegurar que sean párrafos reales
-            if len(texto) > 60:
-                parrafos_limpios.append(texto)
-            # Nos detenemos estrictamente al llegar a 5 párrafos
-            if len(parrafos_limpios) == 5:
+        try:
+            response = self.http_client.get(url, headers=self._headers(), timeout=10)
+            if response.status_code == 404:
+                logging.error("Articulo no encontrado en Wikipedia: %s", clean_topic)
+                return None
+
+            response.raise_for_status()
+        except requests.exceptions.RequestException as error:
+            logging.error("Error de red consultando Wikipedia: %s", error)
+            return None
+
+        return self._parse_article(response.text)
+
+    def _build_url(self, topic: str) -> str:
+        # quote evita problemas con espacios, tildes u otros caracteres especiales en la URL.
+        safe_topic = quote(topic.replace(" ", "_"))
+        return f"{self.base_url}/{safe_topic}"
+
+    def _headers(self) -> dict:
+        # Wikipedia recomienda identificar la aplicacion con un User-Agent.
+        return {"User-Agent": "ContentEnricher/1.0 (student project)"}
+
+    def _parse_article(self, html: str) -> Optional[WikipediaArticle]:
+        # BeautifulSoup convierte el HTML en un arbol facil de consultar.
+        soup = BeautifulSoup(html, "html.parser")
+        title_tag = soup.find("h1", id="firstHeading")
+        title = title_tag.get_text(strip=True) if title_tag else "Articulo de Wikipedia"
+
+        paragraphs = []
+        for paragraph in soup.find_all("p"):
+            text = paragraph.get_text(" ", strip=True)
+            if len(text) > 60:
+                paragraphs.append(text)
+            if len(paragraphs) == 5:
                 break
 
-        contenido_completo = "\n\n".join(parrafos_limpios)
-        logging.info(f"Scraping exitoso. 5 párrafos obtenidos.")
-        return titulo, contenido_completo
+        if not paragraphs:
+            logging.error("Wikipedia no devolvio parrafos utiles para el articulo.")
+            return None
 
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Error de red al conectar a Wikipedia: {str(e)}")
-        print(f"[Error de Red] No se pudo conectar a Wikipedia: {e}")
+        logging.info("Wikipedia devolvio %s parrafos utiles.", len(paragraphs))
+        return WikipediaArticle(title=title, content="\n\n".join(paragraphs))
+
+
+def scraping_wikipedia(tema: str) -> Tuple[Optional[str], Optional[str]]:
+    """Funcion de compatibilidad usada por versiones anteriores del proyecto."""
+    article = WikipediaScraper().search(tema)
+    if article is None:
         return None, None
+    return article.title, article.content

@@ -1,41 +1,34 @@
-"""""
-from deep_translator import GoogleTranslator
-from pip._internal.index import sources
-
-translated_text = GoogleTranslator(sources="es", targets="fr").translate("amor mio, te amo")
-print(translated_text)
-"""
-
 import logging
+
 from deep_translator import GoogleTranslator
 
 
-def traducir_contenido(texto, idioma_destino):
-    """
-    Traduce un texto desde cualquier idioma (detectado automáticamente)
-    al idioma de destino seleccionado por el usuario.
-    """
-    try:
-        logging.info(f"Iniciando proceso de traducción al idioma: {idioma_destino}")
+class TranslatorService:
+    """Se encarga solo de traducir texto con deep-translator."""
 
-        # 'auto' detecta si el texto original está en español, inglés, etc.
-        traductor = GoogleTranslator(source='auto', target=idioma_destino)
-        resultado = traductor.translate(texto)
+    def __init__(self, translator_class=GoogleTranslator):
+        # Inyectar la clase traductora hace que las pruebas no dependan de internet.
+        self.translator_class = translator_class
 
-        logging.info("Traducción completada con éxito.")
-        return resultado
+    def translate(self, text: str, target_language: str) -> str:
+        """Traduce el texto al idioma elegido por el usuario."""
+        clean_language = target_language.strip().lower()
+        if not text:
+            return ""
+        if not clean_language:
+            logging.warning("No se recibio idioma destino para traduccion.")
+            return text
 
-    except Exception as e:
-        logging.error(f"Error en el servicio de traducción: {str(e)}")
-        print(f"[Aviso] No se pudo traducir el contenido. Error: {e}")
-        return texto  # Si falla, devuelve el texto original como respaldo
-
-
-# --- PRUEBA LOCAL ---
-# Esto solo se ejecuta si corres este archivo suelto para probar que funcione
-if __name__ == "__main__":
-    test_traduccion = traducir_contenido("amor mio, te amo", "fr")
-    print("Resultado de la prueba en francés:", test_traduccion)
+        try:
+            logging.info("Traduciendo contenido al idioma: %s", clean_language)
+            translator = self.translator_class(source="auto", target=clean_language)
+            return translator.translate(text)
+        except Exception as error:
+            # Si falla el servicio externo, devolvemos el texto original para no perder informacion.
+            logging.error("Error en traduccion: %s", error)
+            return text
 
 
-
+def traducir_contenido(texto: str, idioma_destino: str) -> str:
+    """Funcion de compatibilidad usada por main.py."""
+    return TranslatorService().translate(texto, idioma_destino)

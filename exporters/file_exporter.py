@@ -1,69 +1,106 @@
+import html
 import logging
+from pathlib import Path
+
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 
 
-def guardar_en_archivo(nombre, formato, titulo, original, enriquecido, traducido, resumen=""):
-    """
-    Permite al usuario guardar el contenido en formato .txt o .pdf profesional,
-    asegurando que si algún campo está vacío (None), se maneje correctamente.
-    """
-    # Validamos que si algún contenido llegó vacío, no rompa el programa
-    titulo = titulo if titulo else "Reporte sin título"
-    original = original if original else "No se obtuvo contenido original de Wikipedia."
-    enriquecido = enriquecido if enriquecido else "No se obtuvo contenido enriquecido."
-    traducido = traducido if traducido else "No se obtuvo contenido traducido."
-    resumen = resumen if resumen else ""
+class FileExporter:
+    """Se encarga solo de guardar reportes en TXT o PDF."""
 
-    nombre_completo = f"{nombre}.{formato}"
-    try:
-        if formato == 'txt':
-            with open(nombre_completo, 'w', encoding='utf-8') as file:
-                file.write(f"REPORTE DE INVESTIGACIÓN: {titulo}\n")
-                file.write("=" * 60 + "\n\n")
-                file.write(f"--- CONTENIDO ORIGINAL WIKIPEDIA ---\n{original}\n\n")
-                file.write(f"--- CONTENIDO ENRIQUECIDO POR IA ---\n{enriquecido}\n\n")
-                if resumen:
-                    file.write(f"--- RESUMEN EJECUTIVO CHATGPT ---\n{resumen}\n\n")
-                file.write(f"--- CONTENIDO TRADUCIDO ---\n{traducido}\n\n")
-            print(f"¡Éxito! Archivo de texto guardado como: '{nombre_completo}'")
+    SUPPORTED_FORMATS = {"txt", "pdf"}
 
-        elif formato == 'pdf':
-            doc = SimpleDocTemplate(nombre_completo, pagesize=letter)
-            estilos = getSampleStyleSheet()
+    def export(self, filename: str, file_format: str, title: str, original: str, enriched: str, translated: str, summary: str = "") -> Path:
+        """Crea el archivo elegido por el usuario y devuelve la ruta generada."""
+        clean_format = file_format.strip().lower()
+        if clean_format not in self.SUPPORTED_FORMATS:
+            raise ValueError("Formato no soportado. Usa 'txt' o 'pdf'.")
 
-            estilo_titulo = ParagraphStyle('DocTitle', parent=estilos['Heading1'], fontSize=18, spaceAfter=12,
-                                           textColor='#1a202c')
-            estilo_sub = ParagraphStyle('DocSub', parent=estilos['Heading2'], fontSize=12, spaceBefore=14, spaceAfter=6,
-                                        textColor='#2b6cb0')
-            estilo_cuerpo = ParagraphStyle('DocBody', parent=estilos['Normal'], fontSize=10, leading=14, spaceAfter=10)
+        output_path = Path(f"{self._safe_filename(filename)}.{clean_format}")
+        report_data = self._normalize_report_data(title, original, enriched, translated, summary)
 
-            historia = []
-            historia.append(Paragraph(f"Reporte de Investigación: {titulo}", estilo_titulo))
-            historia.append(Spacer(1, 10))
-
-            historia.append(Paragraph("1. Contenido Original (Wikipedia)", estilo_sub))
-            historia.append(Paragraph(original.replace('\n', '<br/>'), estilo_cuerpo))
-
-            historia.append(Paragraph("2. Contenido Enriquecido (OpenAI GPT-4)", estilo_sub))
-            historia.append(Paragraph(enriquecido.replace('\n', '<br/>'), estilo_cuerpo))
-
-            if resumen:
-                historia.append(Paragraph("3. Resumen Ejecutivo (ChatGPT)", estilo_sub))
-                historia.append(Paragraph(resumen.replace('\n', '<br/>'), estilo_cuerpo))
-
-            historia.append(Paragraph("4. Contenido Traducido", estilo_sub))
-            historia.append(Paragraph(traducido.replace('\n', '<br/>'), estilo_cuerpo))
-
-            doc.build(historia)
-            print(f"¡Éxito! Reporte PDF profesional guardado como: '{nombre_completo}'")
-
+        if clean_format == "txt":
+            self._write_txt(output_path, report_data)
         else:
-            print("[Error] Formato no soportado. Elige 'txt' o 'pdf'.")
-            return
+            self._write_pdf(output_path, report_data)
 
-        logging.info(f"Archivo exportado correctamente con nombre: {nombre_completo}")
-    except Exception as e:
-        logging.error(f"Error al guardar el archivo en disco: {str(e)}")
-        print(f"[Error de Escritura] No se pudo guardar el archivo: {e}")
+        logging.info("Archivo exportado correctamente: %s", output_path)
+        return output_path
+
+    def _safe_filename(self, filename: str) -> str:
+        # Evitamos nombres vacios o con caracteres que Windows no permite en archivos.
+        clean_name = filename.strip() or "reporte_content_enricher"
+        invalid_chars = '<>:"/\\|?*'
+        for char in invalid_chars:
+            clean_name = clean_name.replace(char, "_")
+        return clean_name
+
+    def _normalize_report_data(self, title: str, original: str, enriched: str, translated: str, summary: str) -> dict:
+        # Centralizamos valores por defecto para que TXT y PDF muestren la misma informacion.
+        return {
+            "title": title or "Reporte sin titulo",
+            "original": original or "No se obtuvo contenido original de Wikipedia.",
+            "enriched": enriched or "No se obtuvo contenido enriquecido.",
+            "translated": translated or "No se obtuvo contenido traducido.",
+            "summary": summary or "",
+        }
+
+    def _write_txt(self, output_path: Path, data: dict) -> None:
+        # El TXT es util para revisar rapidamente el resultado sin programas especiales.
+        content = [
+            f"REPORTE DE INVESTIGACION: {data['title']}",
+            "=" * 60,
+            "",
+            "--- CONTENIDO ORIGINAL WIKIPEDIA ---",
+            data["original"],
+            "",
+            "--- CONTENIDO ENRIQUECIDO POR IA ---",
+            data["enriched"],
+            "",
+        ]
+
+        if data["summary"]:
+            content.extend(["--- RESUMEN EJECUTIVO CHATGPT ---", data["summary"], ""])
+
+        content.extend(["--- CONTENIDO TRADUCIDO ---", data["translated"], ""])
+        output_path.write_text("\n".join(content), encoding="utf-8")
+
+    def _write_pdf(self, output_path: Path, data: dict) -> None:
+        # ReportLab arma el PDF con parrafos para que el texto largo salte de linea correctamente.
+        document = SimpleDocTemplate(str(output_path), pagesize=letter)
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle("DocTitle", parent=styles["Heading1"], fontSize=18, spaceAfter=12)
+        subtitle_style = ParagraphStyle("DocSub", parent=styles["Heading2"], fontSize=12, spaceBefore=14, spaceAfter=6)
+        body_style = ParagraphStyle("DocBody", parent=styles["Normal"], fontSize=10, leading=14, spaceAfter=10)
+
+        story = [
+            Paragraph(f"Reporte de Investigacion: {self._pdf_text(data['title'])}", title_style),
+            Spacer(1, 10),
+            Paragraph("1. Contenido Original (Wikipedia)", subtitle_style),
+            Paragraph(self._pdf_text(data["original"]), body_style),
+            Paragraph("2. Contenido Enriquecido (OpenAI)", subtitle_style),
+            Paragraph(self._pdf_text(data["enriched"]), body_style),
+        ]
+
+        if data["summary"]:
+            story.extend([
+                Paragraph("3. Resumen Ejecutivo (ChatGPT)", subtitle_style),
+                Paragraph(self._pdf_text(data["summary"]), body_style),
+            ])
+
+        story.extend([
+            Paragraph("4. Contenido Traducido", subtitle_style),
+            Paragraph(self._pdf_text(data["translated"]), body_style),
+        ])
+        document.build(story)
+
+    def _pdf_text(self, value: str) -> str:
+        # Escapamos caracteres especiales para que ReportLab no confunda el texto con etiquetas HTML.
+        return html.escape(value).replace("\n", "<br/>")
+
+
+def guardar_en_archivo(nombre: str, formato: str, titulo: str, original: str, enriquecido: str, traducido: str, resumen: str = "") -> Path:
+    """Funcion de compatibilidad usada por main.py."""
+    return FileExporter().export(nombre, formato, titulo, original, enriquecido, traducido, resumen)
