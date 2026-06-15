@@ -36,3 +36,38 @@
 2026-06-08 15:39:28,182 - INFO - Traducción completada con éxito.
 2026-06-08 15:39:49,803 - INFO - Archivo exportado correctamente con nombre: Javascript.pdf
 2026-06-08 15:39:49,803 - INFO - Ejecución del flujo completada con éxito.
+2026-06-12 09:53:58,547 - INFO - El usuario ha iniciado el sistema.
+2026-06-12 09:54:05,838 - INFO - Iniciando scraping en Wikipedia para el tema: 'bootcamp'
+2026-06-12 09:54:06,657 - ERROR - Artículo no encontrado (404) para el tema: bootcamp
+2026-06-12 09:54:06,658 - INFO - Simulando enriquecimiento de texto con OpenAI para la entrega técnica.
+2026-06-12 09:54:06,658 - INFO - Simulando enriquecimiento de texto con OpenAI para la entrega técnica.
+2026-06-12 09:54:13,166 - INFO - Simulando resumen ejecutivo de ChatGPT.
+2026-06-12 09:54:13,166 - INFO - Iniciando proceso de traducción al idioma: en
+2026-06-12 09:54:13,827 - INFO - Traducción completada con éxito.
+2026-06-12 09:54:23,697 - INFO - Archivo exportado correctamente con nombre: bootcamp.pdf
+2026-06-12 09:54:23,698 - INFO - Ejecución del flujo completada con éxito.
+2026-06-12 09:54:38,060 - INFO - El usuario ha iniciado el sistema.
+2026-06-12 09:54:46,949 - INFO - Iniciando scraping en Wikipedia para el tema: 'python'
+2026-06-12 09:54:47,814 - INFO - Scraping exitoso. 5 párrafos obtenidos.
+2026-06-12 09:54:47,815 - INFO - Simulando enriquecimiento de texto con OpenAI para la entrega técnica.
+2026-06-12 09:54:52,485 - INFO - Simulando resumen ejecutivo de ChatGPT.
+2026-06-12 09:54:52,485 - INFO - Iniciando proceso de traducción al idioma: en
+2026-06-12 09:54:54,039 - INFO - Traducción completada con éxito.
+2026-06-12 09:55:03,082 - INFO - Archivo exportado correctamente con nombre: python.pdf
+2026-06-12 09:55:03,082 - INFO - Ejecución del flujo completada con éxito.
+2026-06-15 11:29:52,929 - INFO - El usuario inicio el sistema.
+2026-06-15 11:30:05,807 - INFO - Consultando Wikipedia para el tema: python
+2026-06-15 11:30:06,585 - INFO - Wikipedia devolvio 5 parrafos utiles.
+2026-06-15 11:30:06,586 - WARNING - OPENAI_API_KEY no esta configurada. Se usa enriquecimiento local.
+2026-06-15 11:30:26,018 - WARNING - OPENAI_API_KEY no esta configurada. Se usa resumen local.
+2026-06-15 11:30:26,019 - INFO - Traduciendo contenido al idioma: en
+2026-06-15 11:30:50,914 - INFO - Archivo exportado correctamente: puthon.pdf
+2026-06-15 11:30:50,914 - INFO - Flujo completado correctamente.
+2026-06-15 11:31:08,710 - INFO - El usuario inicio el sistema.
+2026-06-15 11:31:31,391 - INFO - Consultando Wikipedia para el tema: desintoxicación
+2026-06-15 11:31:32,381 - INFO - Wikipedia devolvio 5 parrafos utiles.
+2026-06-15 11:31:32,382 - WARNING - OPENAI_API_KEY no esta configurada. Se usa enriquecimiento local.
+2026-06-15 11:31:34,504 - WARNING - OPENAI_API_KEY no esta configurada. Se usa resumen local.
+2026-06-15 11:31:34,505 - INFO - Traduciendo contenido al idioma: es
+2026-06-15 11:31:50,112 - INFO - Archivo exportado correctamente: desintoxicacion.txt
+2026-06-15 11:31:50,112 - INFO - Flujo completado correctamente.
