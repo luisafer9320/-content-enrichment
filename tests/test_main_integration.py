@@ -1,6 +1,7 @@
+import json
 import main
 from scraper.wiki_scraper import WikipediaArticle
-from main import ContentEnricherApp, configure_logging, ejecutar_sistema
+from main import ContentEnricherApp, app, build_web_report, configure_logging, ejecutar_sistema
 
 
 class FakeScraper:
@@ -130,6 +131,26 @@ def test_console_flow_prints_export_error(monkeypatch, capsys):
     assert "Formato no soportado" in output
 
 
+def test_console_flow_prints_disk_export_error(monkeypatch, capsys):
+    class DiskErrorExporter:
+        def export(self, filename, file_format, title, original, enriched, translated, summary):
+            raise OSError("permiso denegado")
+
+    app = ContentEnricherApp(
+        scraper=FakeScraper(),
+        ai_service=FakeAIService(),
+        translator=FakeTranslator(),
+        exporter=DiskErrorExporter(),
+    )
+    answers = iter(["Python", "en", "n", "s", "salida", "txt"])
+    monkeypatch.setattr("builtins.input", lambda prompt="": next(answers))
+
+    app.run()
+
+    output = capsys.readouterr().out
+    assert "No se pudo guardar el archivo en el disco" in output
+
+
 def test_configure_logging_calls_basic_config(monkeypatch):
     called = {}
 
@@ -157,3 +178,69 @@ def test_ejecutar_sistema_configures_and_runs_app(monkeypatch):
     ejecutar_sistema()
 
     assert called == {"logging": True, "run": True}
+
+
+def test_build_web_report_validates_required_parameters():
+    data, status_code = build_web_report("", "en")
+
+    assert status_code == 400
+    assert "obligatorios" in data["error"]
+
+
+def test_build_web_report_returns_404_when_wikipedia_fails(monkeypatch):
+    class EmptyScraper:
+        def search(self, topic):
+            return None
+
+    monkeypatch.setattr(main, "WikipediaScraper", lambda: EmptyScraper())
+
+    data, status_code = build_web_report("Nada", "en")
+
+    assert status_code == 404
+    assert "Wikipedia" in data["error"]
+
+
+def test_build_web_report_returns_complete_data(monkeypatch):
+    monkeypatch.setattr(main, "WikipediaScraper", lambda: FakeScraper())
+    monkeypatch.setattr(main, "OpenAIService", lambda: FakeAIService())
+    monkeypatch.setattr(main, "TranslatorService", lambda: FakeTranslator())
+
+    data, status_code = build_web_report("Python", "en", include_summary=True)
+
+    assert status_code == 200
+    assert data["title"] == "Python"
+    assert data["summary"] == "Resumen de Contenido original enriquecido"
+    assert data["translated"] == "Contenido original enriquecido traducido a en"
+
+
+def test_vercel_app_root_returns_status_json():
+    captured = {}
+
+    def start_response(status, headers):
+        captured["status"] = status
+        captured["headers"] = headers
+
+    response = app({"PATH_INFO": "/", "QUERY_STRING": ""}, start_response)
+    data = json.loads(response[0].decode("utf-8"))
+
+    assert captured["status"] == "200 OK"
+    assert data["status"] == "ok"
+
+
+def test_vercel_app_api_returns_report(monkeypatch):
+    captured = {}
+
+    def fake_build_web_report(topic, language, include_summary):
+        return {"topic": topic, "language": language, "summary": include_summary}, 200
+
+    def start_response(status, headers):
+        captured["status"] = status
+        captured["headers"] = headers
+
+    monkeypatch.setattr(main, "build_web_report", fake_build_web_report)
+
+    response = app({"PATH_INFO": "/api/enrich", "QUERY_STRING": "topic=Python&language=en&summary=true"}, start_response)
+    data = json.loads(response[0].decode("utf-8"))
+
+    assert captured["status"] == "200 OK"
+    assert data == {"topic": "Python", "language": "en", "summary": True}

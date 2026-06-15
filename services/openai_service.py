@@ -30,7 +30,12 @@ class OpenAIService:
             f"{original_text}"
         )
         logging.info("Enviando contenido a OpenAI para enriquecimiento.")
-        return self._ask_openai(prompt)
+        try:
+            return self._ask_openai(prompt)
+        except Exception as error:
+            # Si la API falla por credenciales, conexion o cuota, mantenemos el programa funcionando.
+            logging.error("OpenAI fallo durante el enriquecimiento: %s", error)
+            return self._fallback_enrichment(original_text)
 
     def summarize_text(self, enriched_text: str) -> str:
         """Genera un resumen del contenido enriquecido."""
@@ -46,7 +51,12 @@ class OpenAIService:
             f"{enriched_text}"
         )
         logging.info("Enviando contenido a OpenAI para resumen.")
-        return self._ask_openai(prompt)
+        try:
+            return self._ask_openai(prompt)
+        except Exception as error:
+            # El resumen es una mejora extra; si falla, devolvemos un resumen local.
+            logging.error("OpenAI fallo durante el resumen: %s", error)
+            return self._fallback_summary(enriched_text)
 
     def _ask_openai(self, prompt: str) -> str:
         # Esta llamada usa el SDK oficial de OpenAI instalado en requirements.txt.

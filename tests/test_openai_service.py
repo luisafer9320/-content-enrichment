@@ -27,12 +27,35 @@ class FakeClient:
         self.chat = FakeChat()
 
 
+class BrokenCompletions:
+    def create(self, **kwargs):
+        raise RuntimeError("fallo API")
+
+
+class BrokenChat:
+    def __init__(self):
+        self.completions = BrokenCompletions()
+
+
+class BrokenClient:
+    def __init__(self):
+        self.chat = BrokenChat()
+
+
 def test_enrich_text_uses_openai_client_when_available():
     service = OpenAIService(client=FakeClient())
 
     result = service.enrich_text("Texto original")
 
     assert result == "Respuesta generada por OpenAI"
+
+
+def test_enrich_text_falls_back_when_openai_client_fails():
+    service = OpenAIService(client=BrokenClient())
+
+    result = service.enrich_text("Texto original")
+
+    assert "CONTENIDO ENRIQUECIDO LOCALMENTE" in result
 
 
 def test_enrich_text_returns_empty_string_for_empty_text():
@@ -49,6 +72,14 @@ def test_summarize_text_uses_openai_client_when_available():
     result = service.summarize_text("Texto enriquecido")
 
     assert result == "Respuesta generada por OpenAI"
+
+
+def test_summarize_text_falls_back_when_openai_client_fails():
+    service = OpenAIService(client=BrokenClient())
+
+    result = service.summarize_text("Texto enriquecido.")
+
+    assert result == "- Texto enriquecido."
 
 
 def test_summarize_text_returns_empty_string_for_empty_text():

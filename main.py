@@ -1,4 +1,6 @@
 import logging
+import json
+from urllib.parse import parse_qs
 
 from exporters.file_exporter import FileExporter
 from scraper.wiki_scraper import WikipediaScraper
@@ -110,6 +112,78 @@ class ContentEnricherApp:
         except ValueError as error:
             print(f"[Error] {error}")
             logging.error("No se pudo exportar archivo: %s", error)
+        except OSError as error:
+            # OSError cubre problemas comunes de escritura: permisos, disco o ruta invalida.
+            print(f"[Error] No se pudo guardar el archivo en el disco: {error}")
+            logging.error("Error de sistema al exportar archivo: %s", error)
+
+
+def build_web_report(topic: str, language: str, include_summary: bool = False) -> tuple[dict, int]:
+    """Ejecuta el flujo principal en modo web para Vercel, sin usar input()."""
+    if not topic or not language:
+        return {"error": "Los parametros 'topic' y 'language' son obligatorios."}, 400
+
+    scraper = WikipediaScraper()
+    ai_service = OpenAIService()
+    translator = TranslatorService()
+
+    article = scraper.search(topic)
+    if article is None:
+        return {"error": "No se pudo obtener informacion de Wikipedia para el tema solicitado."}, 404
+
+    enriched = ai_service.enrich_text(article.content)
+    summary = ai_service.summarize_text(enriched) if include_summary else ""
+    translated = translator.translate(enriched, language)
+
+    return {
+        "topic": topic,
+        "language": language,
+        "title": article.title,
+        "original": article.content,
+        "enriched": enriched,
+        "summary": summary,
+        "translated": translated,
+    }, 200
+
+
+def _json_response(start_response, data: dict, status_code: int = 200):
+    """Prepara una respuesta JSON entendible para navegadores y clientes HTTP."""
+    status_text = "OK" if status_code < 400 else "ERROR"
+    body = json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
+    headers = [
+        ("Content-Type", "application/json; charset=utf-8"),
+        ("Content-Length", str(len(body))),
+    ]
+    start_response(f"{status_code} {status_text}", headers)
+    return [body]
+
+
+def app(environ, start_response):
+    """Entrada WSGI que Vercel busca para poder desplegar este proyecto Python."""
+    path = environ.get("PATH_INFO", "/")
+    query = parse_qs(environ.get("QUERY_STRING", ""))
+
+    if path == "/api/enrich":
+        topic = query.get("topic", [""])[0].strip()
+        language = query.get("language", [""])[0].strip()
+        include_summary = query.get("summary", ["false"])[0].lower() in {"1", "true", "s", "si", "yes"}
+        data, status_code = build_web_report(topic, language, include_summary)
+        return _json_response(start_response, data, status_code)
+
+    return _json_response(
+        start_response,
+        {
+            "name": "Content Enricher",
+            "status": "ok",
+            "message": "Proyecto desplegado correctamente en Vercel.",
+            "usage": "/api/enrich?topic=Python&language=en&summary=true",
+        },
+    )
+
+
+# Algunos runtimes buscan application o handler; los alias apuntan a la misma app WSGI.
+application = app
+handler = app
 
 
 def ejecutar_sistema() -> None:

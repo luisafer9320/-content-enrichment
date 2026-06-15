@@ -71,3 +71,11 @@
 2026-06-15 11:31:34,505 - INFO - Traduciendo contenido al idioma: es
 2026-06-15 11:31:50,112 - INFO - Archivo exportado correctamente: desintoxicacion.txt
 2026-06-15 11:31:50,112 - INFO - Flujo completado correctamente.
+2026-06-15 14:34:51,698 - INFO - El usuario inicio el sistema.
+2026-06-15 14:35:35,708 - INFO - Consultando Wikipedia para el tema: colombia
+2026-06-15 14:35:37,259 - INFO - Wikipedia devolvio 5 parrafos utiles.
+2026-06-15 14:35:37,261 - WARNING - OPENAI_API_KEY no esta configurada. Se usa enriquecimiento local.
+2026-06-15 14:35:57,774 - WARNING - OPENAI_API_KEY no esta configurada. Se usa resumen local.
+2026-06-15 14:35:57,774 - INFO - Traduciendo contenido al idioma: en
+2026-06-15 14:36:18,365 - INFO - Archivo exportado correctamente: Colombia.pdf
+2026-06-15 14:36:18,365 - INFO - Flujo completado correctamente.
