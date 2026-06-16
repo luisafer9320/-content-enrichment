@@ -5,15 +5,11 @@ from main import ContentEnricherApp, app, build_web_report, configure_logging, e
 
 
 class FakeScraper:
-    """Simula el scraper para probar el flujo completo sin internet."""
-
     def search(self, topic):
         return WikipediaArticle(title="Python", content="Contenido original")
 
 
 class FakeAIService:
-    """Simula OpenAI para enriquecer y resumir de forma controlada."""
-
     def enrich_text(self, original_content):
         return f"{original_content} enriquecido"
 
@@ -22,15 +18,11 @@ class FakeAIService:
 
 
 class FakeTranslator:
-    """Simula DeepTranslate para no depender del servicio externo."""
-
     def translate(self, enriched_content, language):
         return f"{enriched_content} traducido a {language}"
 
 
 class FakeExporter:
-    """Simula el exportador y guarda los datos recibidos para verificarlos."""
-
     def __init__(self):
         self.calls = []
 

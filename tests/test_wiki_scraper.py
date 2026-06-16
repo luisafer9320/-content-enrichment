@@ -5,8 +5,6 @@ from scraper.wiki_scraper import WikipediaScraper, scraping_wikipedia
 
 
 class FakeResponse:
-    """Respuesta falsa que simula lo que devuelve requests.get."""
-
     def __init__(self, text="", status_code=200):
         self.text = text
         self.status_code = status_code
@@ -17,8 +15,6 @@ class FakeResponse:
 
 
 class FakeHttpClient:
-    """Cliente HTTP falso para probar sin conectarnos a Wikipedia."""
-
     def __init__(self, response):
         self.response = response
         self.last_url = None

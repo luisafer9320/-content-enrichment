@@ -1,7 +1,7 @@
 2026-06-08 15:22:15,192 - INFO - El usuario ha iniciado el sistema.
-2026-06-08 15:24:23,721 - INFO - Iniciando scraping en Wikipedia para el tema: 'como estimulo el apetito de mi bebe de 1 año'
-2026-06-08 15:24:24,562 - ERROR - Artículo no encontrado (404) para el tema: como estimulo el apetito de mi bebe de 1 año
-2026-06-08 15:24:24,563 - INFO - Simulando enriquecimiento de texto con OpenAI para la entrega técnica.
+2026-06-08 15:24:23,721 - INFO - Iniciando scraping en Wikipedia para elR - Artículo no encontrado (404) para el tema: como estimulo el apetito de mi bebe de 1 año
+2026-06-08 15:24:24,563 - INFO - Simulando enriquecimiento de texto con Op tema: 'como estimulo el apetito de mi bebe de 1 año'
+2026-06-08 15:24:24,562 - ERROenAI para la entrega técnica.
 2026-06-08 15:24:24,563 - INFO - Simulando enriquecimiento de texto con OpenAI para la entrega técnica.
 2026-06-08 15:24:48,617 - INFO - Simulando resumen ejecutivo de ChatGPT.
 2026-06-08 15:24:48,618 - INFO - Iniciando proceso de traducción al idioma: es
@@ -79,3 +79,31 @@
 2026-06-15 14:35:57,774 - INFO - Traduciendo contenido al idioma: en
 2026-06-15 14:36:18,365 - INFO - Archivo exportado correctamente: Colombia.pdf
 2026-06-15 14:36:18,365 - INFO - Flujo completado correctamente.
+2026-06-15 20:58:23,678 - INFO - El usuario inicio el sistema.
+2026-06-15 20:59:03,466 - INFO - Consultando Wikipedia para el tema: cuando nacio el futbol
+2026-06-15 20:59:04,427 - ERROR - Articulo no encontrado en Wikipedia: cuando nacio el futbol
+2026-06-15 20:59:15,436 - INFO - El usuario inicio el sistema.
+2026-06-15 20:59:23,722 - INFO - Consultando Wikipedia para el tema: futbol
+2026-06-15 20:59:25,522 - INFO - Wikipedia devolvio 5 parrafos utiles.
+2026-06-15 20:59:25,524 - WARNING - OPENAI_API_KEY no esta configurada. Se usa enriquecimiento local.
+2026-06-15 20:59:33,050 - WARNING - OPENAI_API_KEY no esta configurada. Se usa resumen local.
+2026-06-15 20:59:33,050 - INFO - Traduciendo contenido al idioma: es
+2026-06-15 20:59:37,933 - INFO - El usuario decidio no exportar archivo.
+2026-06-15 20:59:37,933 - INFO - Flujo completado correctamente.
+2026-06-15 21:01:24,475 - INFO - El usuario inicio el sistema.
+2026-06-16 08:54:48,161 - INFO - El usuario inicio el sistema.
+2026-06-16 08:54:55,640 - INFO - Consultando Wikipedia para el tema: spiderman
+2026-06-16 08:54:56,648 - INFO - Wikipedia devolvio 5 parrafos utiles.
+2026-06-16 08:54:56,651 - WARNING - OPENAI_API_KEY no esta configurada. Se usa enriquecimiento local.
+2026-06-16 08:55:05,875 - WARNING - OPENAI_API_KEY no esta configurada. Se usa resumen local.
+2026-06-16 08:55:05,876 - INFO - Traduciendo contenido al idioma: es
+2026-06-16 08:55:19,001 - INFO - Archivo exportado correctamente: spiderman.pdf
+2026-06-16 08:55:19,002 - INFO - Flujo completado correctamente.
+2026-06-16 11:01:04,875 - INFO - El usuario inicio el sistema.
+2026-06-16 11:01:18,772 - INFO - Consultando Wikipedia para el tema: libro
+2026-06-16 11:01:19,905 - INFO - Wikipedia devolvio 5 parrafos utiles.
+2026-06-16 11:01:19,906 - WARNING - OPENAI_API_KEY no esta configurada. Se usa enriquecimiento local.
+2026-06-16 11:01:40,627 - WARNING - OPENAI_API_KEY no esta configurada. Se usa resumen local.
+2026-06-16 11:01:40,627 - INFO - Traduciendo contenido al idioma: en
+2026-06-16 11:02:10,889 - INFO - Archivo exportado correctamente: libro.pdf
+2026-06-16 11:02:10,889 - INFO - Flujo completado correctamente.

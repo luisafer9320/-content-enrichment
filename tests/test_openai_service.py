@@ -2,8 +2,6 @@ from services.openai_service import OpenAIService, enriquecer_con_ai, generar_re
 
 
 class FakeMessage:
-    """Contenedor simple para simular la respuesta del SDK de OpenAI."""
-
     content = "Respuesta generada por OpenAI"
 
 

@@ -8,12 +8,9 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 
 
 class FileExporter:
-    """Se encarga solo de guardar reportes en TXT o PDF."""
-
     SUPPORTED_FORMATS = {"txt", "pdf"}
 
     def export(self, filename: str, file_format: str, title: str, original: str, enriched: str, translated: str, summary: str = "") -> Path:
-        """Crea el archivo elegido por el usuario y devuelve la ruta generada."""
         clean_format = file_format.strip().lower()
         if clean_format not in self.SUPPORTED_FORMATS:
             raise ValueError("Formato no soportado. Usa 'txt' o 'pdf'.")
@@ -30,7 +27,6 @@ class FileExporter:
         return output_path
 
     def _safe_filename(self, filename: str) -> str:
-        # Evitamos nombres vacios o con caracteres que Windows no permite en archivos.
         clean_name = filename.strip() or "reporte_content_enricher"
         invalid_chars = '<>:"/\\|?*'
         for char in invalid_chars:
@@ -38,7 +34,6 @@ class FileExporter:
         return clean_name
 
     def _normalize_report_data(self, title: str, original: str, enriched: str, translated: str, summary: str) -> dict:
-        # Centralizamos valores por defecto para que TXT y PDF muestren la misma informacion.
         return {
             "title": title or "Reporte sin titulo",
             "original": original or "No se obtuvo contenido original de Wikipedia.",
@@ -48,7 +43,6 @@ class FileExporter:
         }
 
     def _write_txt(self, output_path: Path, data: dict) -> None:
-        # El TXT es util para revisar rapidamente el resultado sin programas especiales.
         content = [
             f"REPORTE DE INVESTIGACION: {data['title']}",
             "=" * 60,
@@ -68,7 +62,6 @@ class FileExporter:
         output_path.write_text("\n".join(content), encoding="utf-8")
 
     def _write_pdf(self, output_path: Path, data: dict) -> None:
-        # ReportLab arma el PDF con parrafos para que el texto largo salte de linea correctamente.
         document = SimpleDocTemplate(str(output_path), pagesize=letter)
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle("DocTitle", parent=styles["Heading1"], fontSize=18, spaceAfter=12)
@@ -97,10 +90,8 @@ class FileExporter:
         document.build(story)
 
     def _pdf_text(self, value: str) -> str:
-        # Escapamos caracteres especiales para que ReportLab no confunda el texto con etiquetas HTML.
         return html.escape(value).replace("\n", "<br/>")
 
 
 def guardar_en_archivo(nombre: str, formato: str, titulo: str, original: str, enriquecido: str, traducido: str, resumen: str = "") -> Path:
-    """Funcion de compatibilidad usada por main.py."""
     return FileExporter().export(nombre, formato, titulo, original, enriquecido, traducido, resumen)

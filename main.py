@@ -9,7 +9,6 @@ from services.translator.TranslatorService import TranslatorService
 
 
 def configure_logging() -> None:
-    """Configura el archivo de logs solicitado en los requisitos tecnicos."""
     logging.basicConfig(
         filename="app_logging.log",
         level=logging.INFO,
@@ -19,17 +18,13 @@ def configure_logging() -> None:
 
 
 class ContentEnricherApp:
-    """Coordina el flujo completo de la aplicacion de consola."""
-
     def __init__(self, scraper=None, ai_service=None, translator=None, exporter=None):
-        # Cada dependencia tiene una sola responsabilidad y puede probarse por separado.
         self.scraper = scraper or WikipediaScraper()
         self.ai_service = ai_service or OpenAIService()
         self.translator = translator or TranslatorService()
         self.exporter = exporter or FileExporter()
 
     def run(self) -> None:
-        """Ejecuta el flujo principal pedido en el proyecto."""
         self._print_header()
         logging.info("El usuario inicio el sistema.")
 
@@ -82,7 +77,6 @@ class ContentEnricherApp:
         return self.ai_service.enrich_text(original_content)
 
     def _ask_for_summary(self, enriched_content: str) -> str:
-        # Este requisito es extra, por eso se pregunta al usuario si desea usarlo.
         wants_summary = input("\nDesea generar un resumen con ChatGPT? (s/n): ").strip().lower()
         if wants_summary != "s":
             return ""
@@ -113,13 +107,11 @@ class ContentEnricherApp:
             print(f"[Error] {error}")
             logging.error("No se pudo exportar archivo: %s", error)
         except OSError as error:
-            # OSError cubre problemas comunes de escritura: permisos, disco o ruta invalida.
             print(f"[Error] No se pudo guardar el archivo en el disco: {error}")
             logging.error("Error de sistema al exportar archivo: %s", error)
 
 
 def build_web_report(topic: str, language: str, include_summary: bool = False) -> tuple[dict, int]:
-    """Ejecuta el flujo principal en modo web para Vercel, sin usar input()."""
     if not topic or not language:
         return {"error": "Los parametros 'topic' y 'language' son obligatorios."}, 400
 
@@ -147,7 +139,6 @@ def build_web_report(topic: str, language: str, include_summary: bool = False) -
 
 
 def _json_response(start_response, data: dict, status_code: int = 200):
-    """Prepara una respuesta JSON entendible para navegadores y clientes HTTP."""
     status_text = "OK" if status_code < 400 else "ERROR"
     body = json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
     headers = [
@@ -159,7 +150,6 @@ def _json_response(start_response, data: dict, status_code: int = 200):
 
 
 def app(environ, start_response):
-    """Entrada WSGI que Vercel busca para poder desplegar este proyecto Python."""
     path = environ.get("PATH_INFO", "/")
     query = parse_qs(environ.get("QUERY_STRING", ""))
 
@@ -181,18 +171,16 @@ def app(environ, start_response):
     )
 
 
-# Algunos runtimes buscan application o handler; los alias apuntan a la misma app WSGI.
 application = app
 handler = app
 
 
 def ejecutar_sistema() -> None:
-    """Funcion de entrada para mantener compatibilidad con el proyecto original."""
     configure_logging()
     ContentEnricherApp().run()
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     try:
         ejecutar_sistema()
     except Exception as error:

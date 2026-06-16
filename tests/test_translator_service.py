@@ -2,8 +2,6 @@ from services.translator.TranslatorService import TranslatorService, traducir_co
 
 
 class FakeTranslator:
-    """Traductor falso que evita llamar al servicio externo en las pruebas."""
-
     def __init__(self, source, target):
         self.source = source
         self.target = target
@@ -13,8 +11,6 @@ class FakeTranslator:
 
 
 class BrokenTranslator:
-    """Traductor falso que simula un error del proveedor externo."""
-
     def __init__(self, source, target):
         raise RuntimeError("servicio caido")
 
